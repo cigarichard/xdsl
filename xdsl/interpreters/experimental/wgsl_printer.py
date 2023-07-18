@@ -129,18 +129,13 @@ class WGSLPrinter:
 
     @print.register
     def _(self, op: memref.Load, out_stream: IO[str]):
-        memref_dimension = op.memref.type.get_num_dims()
-        memref_size = list(op.memref.type.get_shape())
+        memref_type = cast(MemRefType[Attribute], op.memref.type)
+        memref_dimension = memref_type.get_num_dims()
+        memref_size = memref_type.get_shape()
         load_ref = self.wgsl_name(op.memref)
         name_hint = self.wgsl_name(op.res)
         indices = [self.wgsl_name(i) for i in op.indices]
-        index_values = []
-        for i in range(memref_dimension):
-            product_of_dims = 1
-            for dim in memref_size[i + 1 :]:
-                product_of_dims *= dim
-            index_values.append(f"{product_of_dims} * {indices[i]}")
-        index_value = " + ".join(index_values)
+        index_value = self.calculate_index(memref_dimension, memref_size, indices)
         out_stream.write(
             f"""
         let {name_hint} = {load_ref}[{index_value}];"""
@@ -148,23 +143,28 @@ class WGSLPrinter:
 
     @print.register
     def _(self, op: memref.Store, out_stream: IO[str]):
-        memref_dimension = op.memref.type.get_num_dims()
-        memref_size = list(op.memref.type.get_shape())
+        memref_type = cast(MemRefType[Attribute], op.memref.type)
+        memref_dimension = memref_type.get_num_dims()
+        memref_size = memref_type.get_shape()
         value = self.wgsl_name(op.value)
         store_ref = self.wgsl_name(op.memref)
         indices = [self.wgsl_name(i) for i in op.indices]
-        index_values = []
+        index_value = self.calculate_index(memref_dimension, memref_size, indices)
+        out_stream.write(
+            f"""
+        {store_ref}[{index_value}] = {value};"""
+        )
+
+    def calculate_index(
+        self, memref_dimension: int, memref_size: tuple[int], indices: list[str]
+    ):
+        index_values: list[str] = []
         for i in range(memref_dimension):
             product_of_dims = 1
             for dim in memref_size[i + 1 :]:
                 product_of_dims *= dim
             index_values.append(f"{product_of_dims} * {indices[i]}")
-        index_value = " + ".join(index_values)
-        out_stream.write(
-            f"""
-        {store_ref}[{index_value}] = {value};
-        """
-        )
+        return " + ".join(index_values)
 
     @print.register
     def _(self, op: gpu.ModuleEndOp, out_stream: IO[str]):
