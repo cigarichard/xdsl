@@ -8,15 +8,14 @@ from sys import stdout
 import wgpu
 import wgpu.backends.rs  # Select backend
 from wgpu.utils import compute_with_buffers  # Convenience function
-from xdsl.dialects.builtin import FunctionType, SymbolRefAttr
-from xdsl.dialects.func import FuncOp  # Convenience function
-from xdsl.dialects import gpu, memref, builtin
-from xdsl.builder import Builder
-from xdsl.ir import BlockArgument
-from xdsl.printer import Printer
-from xdsl.interpreter import Interpreter
 
-from wgpu_interpreter import WGPUFunctions
+# from xdsl.dialects.builtin import FunctionType, SymbolRefAttr
+# from xdsl.dialects.func import FuncOp  # Convenience function
+# from xdsl.dialects import gpu, memref, builtin
+# from xdsl.builder import Builder
+# from xdsl.ir import BlockArgument
+# from xdsl.printer import Printer
+# from xdsl.interpreter import Interpreter
 
 
 # This defines the function's body
@@ -98,7 +97,7 @@ new = """
         
                     let cst1 : u32 = 1u;
                     
-                    let cstm1 : u32 = 4294967295u;
+                    let cstm1 : u32 = 429496729u;
                     
             let cst2 : i32 = 2;
             
