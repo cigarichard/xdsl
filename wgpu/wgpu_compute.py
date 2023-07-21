@@ -67,7 +67,7 @@ shader_source = """
 @group(0) @binding(0)
 var<storage,read> data1: array<i32>;
 
-@group(0) @binding(1)
+@group(0) @binding(0)
 var<storage,read_write> data2: array<i32>;
 
 @compute
@@ -79,41 +79,25 @@ fn main(@builtin(global_invocation_id) index: vec3<u32>) {
 """
 
 new = """
- @group(0) @binding(0)
-                    var<storage,read> data1: array<i32>;
-                
-                    @group(0) @binding(1)
-                    var<storage,read_write> data2: array<i32>;
-                
-        @compute
-                @workgroup_size(1)
+    
+    @group(0) @binding(1)
+    var<storage, read_write> varg1: array<u32>;
 
-        fn main(@builtin(global_invocation_id) global_invocation_id : vec3<u32>, 
+    @compute
+    @workgroup_size(1)
+    fn main(@builtin(global_invocation_id) global_invocation_id : vec3<u32>,
     @builtin(workgroup_id) workgroup_id : vec3<u32>,
     @builtin(local_invocation_id) local_invocation_id : vec3<u32>,
     @builtin(num_workgroups) num_workgroups : vec3<u32>) {
-        
-        let i: u32 = global_invocation_id.x;
-        
-                    let cst1 : u32 = 1u;
-                    
-                    let cstm1 : u32 = 429496729u;
-                    
-            let cst2 : i32 = 2;
-            
-        let im1 = i + cstm1;
-        let ip1 = i + cst1;
-                let val = data1[i];
-                
-                let valm1 = data1[im1];
-                
-                let valp1 = data1[ip1];
-                
-        let sides = valm1 + valp1;
-                let val2 = val * cst2;
-                let res = sides - val2;
-                        data2[i] = res;
-                        
+
+      let v0 : u32 = 2u;
+        let v1: u32 = global_invocation_id.x;
+        let v2: u32 = global_invocation_id.y;
+        let v3 : u32 = 4u;
+        let v4 = v1 * v3;
+        let v5 = v4 + v2;
+        varg1[4u * v1 + 1u * v2] = v5;
+
             }
 
 """
